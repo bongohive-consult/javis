@@ -34,7 +34,7 @@ We welcome contributions in the form of:
    Add the original repository as an upstream remote:
 
    ```bash
-   git remote add upstream https://github.com/<original-org>/javis.git
+   git remote add upstream https://github.com/bongohive-consult/javis.git
    ```
 
 4. **Create a Branch**  

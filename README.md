@@ -51,7 +51,7 @@ Documentation for additional tools will follow the same structure under the `doc
 Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/javis.git
+git clone https://github.com/bongohive-consult/javis.git
 cd javis
 ```
 
