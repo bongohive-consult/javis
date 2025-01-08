@@ -17,7 +17,7 @@ prompt() {
 # Prompt user for required variables
 echo "Please provide the following deployment variables:"
 prompt NODE_VERSION "Node.js Version" "22.13.0"
-prompt APP_DIR "Application Directory" "./nestjs-app"
+prompt APP_DIR "Application Directory (absolute path)" "/root/app-name"
 prompt REPO_URL "Repository URL" "https://github.com/your-org/your-repo.git"
 prompt DOMAIN "Domain Name" "yourdomain.com"
 prompt EMAIL "Email for SSL Certbot" "itsupport@bongohive.co.zm"
@@ -63,11 +63,24 @@ echo "Installing PM2..."
 npm install -g pm2 || { echo "Failed to install PM2."; exit 1; }
 
 # Clone Repository
-echo "Cloning repository from $REPO_URL..."
-sudo mkdir -p $APP_DIR
-sudo chown $USER:$USER $APP_DIR
-git clone $REPO_URL $APP_DIR || { echo "Failed to clone repository."; exit 1; }
-cd $APP_DIR
+echo "Cloning repository from $REPO_URL into $APP_DIR..."
+sudo mkdir -p "$APP_DIR"
+sudo chown $USER:$USER "$APP_DIR"
+git clone "$REPO_URL" "$APP_DIR" || { echo "Failed to clone repository."; exit 1; }
+
+# Navigate to the application directory
+cd "$APP_DIR"
+
+# Check for package.json
+if [ ! -f "package.json" ]; then
+    if [ -d "nestjs-app" ]; then
+        echo "Navigating to subdirectory 'nestjs-app'..."
+        cd "nestjs-app"
+    else
+        echo "Error: package.json not found in $APP_DIR or any subdirectory."
+        exit 1
+    fi
+fi
 
 # Install dependencies
 echo "Installing application dependencies..."
@@ -105,7 +118,7 @@ sudo systemctl restart nginx || { echo "Failed to restart Nginx."; exit 1; }
 
 # Configure SSL with Certbot
 echo "Setting up SSL with Certbot..."
-sudo certbot --nginx -d $DOMAIN -d www.$DOMAIN --email $EMAIL --agree-tos --non-interactive || { echo "Failed to configure SSL with Certbot."; exit 1; }
+sudo certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" --email "$EMAIL" --agree-tos --non-interactive || { echo "Failed to configure SSL with Certbot."; exit 1; }
 sudo systemctl reload nginx || { echo "Failed to reload Nginx."; exit 1; }
 
 echo -e "\nDeployment completed successfully!"
